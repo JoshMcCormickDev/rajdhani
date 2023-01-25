@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker
 
 from .config import db_path, db_init_url, db_uri
 
+
 engine = create_engine(db_uri)
 Session = sessionmaker(bind=engine)
 
