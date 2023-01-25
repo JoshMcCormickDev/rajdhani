@@ -1,9 +1,13 @@
 import requests
 import sqlite3
 from pathlib import Path
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
-from .config import db_path, db_init_url
+from .config import db_path, db_init_url, db_uri
 
+engine = create_engine(db_uri)
+Session = sessionmaker(bind=engine)
 
 def init_db():
     download_file(db_init_url, db_path)

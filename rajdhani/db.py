@@ -4,12 +4,7 @@ Module to interact with the database.
 
 from . import placeholders
 from . import db_ops
-
-db_ops.ensure_db()
-
-# config has 'db_uri' that can be used to connect to the database
-from . import config
-
+from . import models
 
 def search_trains(
         from_station_code,
@@ -24,10 +19,14 @@ def search_trains(
 
     This is used to get show the trains on the search results page.
     """
-    # TODO: make a db query to get the matching trains
-    # and replace the following dummy implementation
-
-    return placeholders.SEARCH_TRAINS
+    with db_ops.Session() as session:
+        q = (
+            session
+            .query(models.Train)
+            .where(models.Train.from_station_code == from_station_code)
+            .where(models.Train.to_station_code == to_station_code)
+        )
+        return q.all()
 
 def search_stations(q):
     """Returns the top ten stations matching the given query string.

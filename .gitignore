@@ -4,3 +4,4 @@ venv/
 
 trains.db
 *.pyc
+.vscode/launch.json
