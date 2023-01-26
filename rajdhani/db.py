@@ -33,7 +33,8 @@ def search_trains(
         )
         return [row.get_result() for row in q.all()]
 
-def search_stations(q):
+
+def search_stations(search):
     """Returns the top ten stations matching the given query string.
 
     This is used to get show the auto complete on the home page.
@@ -41,9 +42,14 @@ def search_stations(q):
     The q is the few characters of the station name or
     code entered by the user.
     """
-    # TODO: make a db query to get the matching stations
-    # and replace the following dummy implementation
-    return placeholders.AUTOCOMPLETE_STATIONS
+    with db_ops.Session() as session:
+        q = (
+            session
+            .query(Station)
+            .where(Station.matches_search(search))
+        )
+        return [row.get_result() for row in q.all()]
+
 
 def get_schedule(train_number):
     """Returns the schedule of a train.
