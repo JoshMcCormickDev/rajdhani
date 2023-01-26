@@ -30,7 +30,7 @@ class Booking(Base):
             "date": self.date,
             "passenger_name": self.passenger_name,
             "passenger_email": self.passenger_email
-        },
+        }
 
     def __repr__(self):
         return f"<Station {self.code}>"
