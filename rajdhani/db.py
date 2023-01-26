@@ -26,7 +26,7 @@ def search_trains(
             .where(models.Train.from_station_code == from_station_code)
             .where(models.Train.to_station_code == to_station_code)
         )
-        return q.all()
+        return [row.get_train_result() for row in q.all()]
 
 def search_stations(q):
     """Returns the top ten stations matching the given query string.

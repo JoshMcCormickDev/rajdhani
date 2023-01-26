@@ -51,7 +51,21 @@ class Train(Base):
     to_station = relationship("Station", 
                                 foreign_keys=[to_station_code],
                                 backref="terminating_trains")
-    
+
+    def get_train_result(self):
+        return {
+            "number": self.number,
+            "name": self.name,
+            "from_station_code": self.from_station_code,
+            "from_station_name": self.from_station_name,
+            "to_station_code": self.to_station_code,
+            "to_station_name": self.to_station_name,
+            "departure": self.departure,
+            "arrival": self.arrival,
+            "duration_h": self.duration_h,
+            "duration_m": self.duration_m
+        }
+
     def __repr__(self):
         return f"<Train {self.number}>"  
 
