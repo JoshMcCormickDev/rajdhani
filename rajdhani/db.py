@@ -8,9 +8,9 @@ from . import models
 
 ticket_class_columns = {
     "SL": models.Train.sleeper,
-    "3AC": models.Train.third_ac,
-    "2AC": models.Train.second_ac,
-    "1AC": models.Train.first_ac,
+    "3A": models.Train.third_ac,
+    "2A": models.Train.second_ac,
+    "1A": models.Train.first_ac,
     "FC": models.Train.first_class,
     "CC": models.Train.chair_car
 }
