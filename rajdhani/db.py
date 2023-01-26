@@ -6,6 +6,15 @@ from . import placeholders
 from . import db_ops
 from . import models
 
+ticket_class_columns = {
+    "SL": models.Train.sleeper,
+    "3AC": models.Train.third_ac,
+    "2AC": models.Train.second_ac,
+    "1AC": models.Train.first_ac,
+    "FC": models.Train.first_class,
+    "CC": models.Train.chair_car
+}
+
 def search_trains(
         from_station_code,
         to_station_code,
@@ -26,6 +35,11 @@ def search_trains(
             .where(models.Train.from_station_code == from_station_code)
             .where(models.Train.to_station_code == to_station_code)
         )
+
+        if ticket_class:
+            q = q.where(ticket_class_columns[ticket_class] == 1)
+
+
         return [row.get_train_result() for row in q.all()]
 
 def search_stations(q):
