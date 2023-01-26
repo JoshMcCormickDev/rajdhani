@@ -94,7 +94,10 @@ def book_ticket(train_number, ticket_class, departure_date, passenger_name, pass
 def get_trips(email):
     """Returns the bookings made by the user
     """
-    # TODO: make a db query and get the bookings
-    # made by user with `email`
-
-    return placeholders.TRIPS
+    with db_ops.Session() as session:
+        q = (
+            session
+            .query(Booking)
+            .where(Booking.passenger_email == email)
+        )
+        return [row.get_result() for row in q.all()]
