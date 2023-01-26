@@ -4,16 +4,9 @@ Module to interact with the database.
 
 from . import placeholders
 from . import db_ops
-from . import models
+db_ops.ensure_db()
 
-ticket_class_columns = {
-    "SL": models.Train.sleeper,
-    "3A": models.Train.third_ac,
-    "2A": models.Train.second_ac,
-    "1A": models.Train.first_ac,
-    "FC": models.Train.first_class,
-    "CC": models.Train.chair_car
-}
+from rajdhani.models.train import Train, is_ticket_class, is_in_time_slots
 
 def search_trains(
         from_station_code,
@@ -31,15 +24,12 @@ def search_trains(
     with db_ops.Session() as session:
         q = (
             session
-            .query(models.Train)
-            .where(models.Train.from_station_code == from_station_code)
-            .where(models.Train.to_station_code == to_station_code)
+            .query(Train)
+            .where(Train.from_station_code == from_station_code)
+            .where(Train.to_station_code == to_station_code)
+            .where(is_ticket_class(ticket_class))
+            .where(is_in_time_slots(departure_time, arrival_time))
         )
-
-        if ticket_class:
-            q = q.where(ticket_class_columns[ticket_class] == 1)
-
-
         return [row.get_train_result() for row in q.all()]
 
 def search_stations(q):

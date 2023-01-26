@@ -1,24 +1,8 @@
-from . import db_ops
-db_ops.ensure_db()
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, and_, or_
+from sqlalchemy.orm import relationship
 
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
-from sqlalchemy.orm import declarative_base, relationship
-
-Base = declarative_base(bind=db_ops.engine)
-
-class Station(Base):
-    __tablename__ = "station"
-    
-    code = Column(String, primary_key=True)
-    name = Column(String)
-    zone = Column(String)
-    state = Column(String)
-    address = Column(String)
-    latitude = Column(Float)    
-    longitude = Column(Float)
-    
-    def __repr__(self):
-        return f"<Station {self.code}>"
+from rajdhani.db_ops import Base
+from rajdhani.models.station import Station
 
 
 class Train(Base):
@@ -52,6 +36,7 @@ class Train(Base):
                                 foreign_keys=[to_station_code],
                                 backref="terminating_trains")
 
+
     def get_train_result(self):
         return {
             "number": self.number,
@@ -65,32 +50,47 @@ class Train(Base):
             "duration_h": self.duration_h,
             "duration_m": self.duration_m
         }
+    
 
     def __repr__(self):
         return f"<Train {self.number}>"  
 
 
-# class Booking(Base):
-#     __tablename__ = "booking"
-    
-#     id = Column(Integer, primary_key=True)
-#     train_number = Column(String, ForeignKey(Train.number))
+_ticket_class_columns = {
+    "SL": Train.sleeper,
+    "3A": Train.third_ac,
+    "2A": Train.second_ac,
+    "1A": Train.first_ac,
+    "FC": Train.first_class,
+    "CC": Train.chair_car
+}
 
-#     from_station_code = Column(String, ForeignKey(Station.code))
-#     to_station_code = Column(String, ForeignKey(Station.code))
+_time_slots = {
+    "slot1": ("00:00:00", "08:00:00"),
+    "slot2": ("08:00:00", "12:00:00"),
+    "slot3": ("12:00:00", "16:00:00"),
+    "slot4": ("16:00:00", "20:00:00"),
+    "slot5": ("20:00:00", "24:00:00"),
+}
 
-#     passenger_name = Column(String)
-#     passenger_email = Column(String)
-#     ticket_class = Column(String)
-#     date = Column(String)
-    
-#     train = relationship("Train", foreign_keys=[train_number], backref="bookings")
-#     from_station = relationship("Station", 
-#                                 foreign_keys=[from_station_code],
-#                                 backref="starting_trains")
-#     to_station = relationship("Station", 
-#                                 foreign_keys=[to_station_code],
-#                                 backref="terminating_trains")
-    
-#     def __repr__(self):
-#         return f"<Booking {self.id}>"
+def is_ticket_class(ticket_class):
+    if ticket_class:
+        return _ticket_class_columns[ticket_class] == 1
+    else:
+        return True
+
+def is_in_time_slots(departure_slots, arrival_slots):
+    return and_(
+        _is_in_time_slots_inner(Train.departure, departure_slots),
+        _is_in_time_slots_inner(Train.arrival, arrival_slots)
+    )
+
+def _is_in_time_slots_inner(column, slots):
+    if slots:
+        time_slot_clauses = []
+        for slot in slots:
+            slot_start, slot_end = _time_slots[slot]
+            time_slot_clauses.append(and_(column >= slot_start, column <= slot_end))
+        return or_(*time_slot_clauses)
+    else:
+        return True
