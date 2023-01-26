@@ -4,7 +4,6 @@ from sqlalchemy.orm import relationship
 from rajdhani.db_ops import Base
 from rajdhani.models.station import Station
 
-
 class Train(Base):
     __tablename__ = "train"
     
@@ -36,8 +35,49 @@ class Train(Base):
                                 foreign_keys=[to_station_code],
                                 backref="terminating_trains")
 
+    _ticket_class_columns = {
+        "SL": sleeper,
+        "3A": third_ac,
+        "2A": second_ac,
+        "1A": first_ac,
+        "FC": first_class,
+        "CC": chair_car
+    }
 
-    def get_train_result(self):
+    _time_slots = {
+        "slot1": ("00:00:00", "08:00:00"),
+        "slot2": ("08:00:00", "12:00:00"),
+        "slot3": ("12:00:00", "16:00:00"),
+        "slot4": ("16:00:00", "20:00:00"),
+        "slot5": ("20:00:00", "24:00:00"),
+    }
+
+    @staticmethod
+    def is_ticket_class(ticket_class):
+        if ticket_class:
+            return Train._ticket_class_columns[ticket_class] == 1
+        else:
+            return True
+
+    @staticmethod
+    def is_in_time_slots(departure_slots, arrival_slots):
+        return and_(
+            Train._is_in_time_slots_inner(Train.departure, departure_slots),
+            Train._is_in_time_slots_inner(Train.arrival, arrival_slots)
+        )
+
+    @staticmethod
+    def _is_in_time_slots_inner(column, slots):
+        if slots:
+            time_slot_clauses = []
+            for slot in slots:
+                slot_start, slot_end = Train._time_slots[slot]
+                time_slot_clauses.append(and_(column >= slot_start, column <= slot_end))
+            return or_(*time_slot_clauses)
+        else:
+            return True
+
+    def get_result(self):
         return {
             "number": self.number,
             "name": self.name,
@@ -54,43 +94,3 @@ class Train(Base):
 
     def __repr__(self):
         return f"<Train {self.number}>"  
-
-
-_ticket_class_columns = {
-    "SL": Train.sleeper,
-    "3A": Train.third_ac,
-    "2A": Train.second_ac,
-    "1A": Train.first_ac,
-    "FC": Train.first_class,
-    "CC": Train.chair_car
-}
-
-_time_slots = {
-    "slot1": ("00:00:00", "08:00:00"),
-    "slot2": ("08:00:00", "12:00:00"),
-    "slot3": ("12:00:00", "16:00:00"),
-    "slot4": ("16:00:00", "20:00:00"),
-    "slot5": ("20:00:00", "24:00:00"),
-}
-
-def is_ticket_class(ticket_class):
-    if ticket_class:
-        return _ticket_class_columns[ticket_class] == 1
-    else:
-        return True
-
-def is_in_time_slots(departure_slots, arrival_slots):
-    return and_(
-        _is_in_time_slots_inner(Train.departure, departure_slots),
-        _is_in_time_slots_inner(Train.arrival, arrival_slots)
-    )
-
-def _is_in_time_slots_inner(column, slots):
-    if slots:
-        time_slot_clauses = []
-        for slot in slots:
-            slot_start, slot_end = _time_slots[slot]
-            time_slot_clauses.append(and_(column >= slot_start, column <= slot_end))
-        return or_(*time_slot_clauses)
-    else:
-        return True

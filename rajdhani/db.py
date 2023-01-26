@@ -6,7 +6,8 @@ from . import placeholders
 from . import db_ops
 db_ops.ensure_db()
 
-from rajdhani.models.train import Train, is_ticket_class, is_in_time_slots
+from rajdhani.models.station import Station
+from rajdhani.models.train import Train
 
 def search_trains(
         from_station_code,
@@ -27,10 +28,10 @@ def search_trains(
             .query(Train)
             .where(Train.from_station_code == from_station_code)
             .where(Train.to_station_code == to_station_code)
-            .where(is_ticket_class(ticket_class))
-            .where(is_in_time_slots(departure_time, arrival_time))
+            .where(Train.is_ticket_class(ticket_class))
+            .where(Train.is_in_time_slots(departure_time, arrival_time))
         )
-        return [row.get_train_result() for row in q.all()]
+        return [row.get_result() for row in q.all()]
 
 def search_stations(q):
     """Returns the top ten stations matching the given query string.
