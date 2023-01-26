@@ -25,6 +25,5 @@ class Station(Base):
             "name": self.name
         }
     
-
     def __repr__(self):
         return f"<Station {self.code}>"

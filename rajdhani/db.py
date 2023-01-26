@@ -6,6 +6,7 @@ from . import placeholders
 from . import db_ops
 db_ops.ensure_db()
 
+from rajdhani.models.booking import Booking
 from rajdhani.models.schedule import Schedule
 from rajdhani.models.station import Station
 from rajdhani.models.train import Train
@@ -67,10 +68,27 @@ def get_schedule(train_number):
 def book_ticket(train_number, ticket_class, departure_date, passenger_name, passenger_email):
     """Book a ticket for passenger
     """
-    # TODO: make a db query and insert a new booking
-    # into the booking table
+    with db_ops.Session() as session:
+        train_q = (
+            session
+            .query(Train)
+            .where(Train.number == train_number)
+        )
 
-    return placeholders.TRIPS[0]
+        train = train_q.one()
+
+        booking = Booking()
+        booking.train_number = train_number
+        booking.from_station_code = train.from_station_code
+        booking.to_station_code = train.to_station_code
+        booking.passenger_name = passenger_name
+        booking.passenger_email = passenger_email
+        booking.ticket_class = ticket_class
+        booking.date = departure_date
+        session.add(booking)
+        session.commit()
+
+        return booking.get_result()
 
 
 def get_trips(email):
