@@ -86,6 +86,9 @@ def book_ticket(train_number, ticket_class, departure_date, passenger_name, pass
         booking.ticket_class = ticket_class
         booking.date = departure_date
         session.add(booking)
+
+        train.decrement_tickets(ticket_class)
+
         session.commit()
 
         return booking.get_result()

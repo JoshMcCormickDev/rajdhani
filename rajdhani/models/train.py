@@ -91,6 +91,9 @@ class Train(Base):
             "duration_m": self.duration_m
         }
     
+    def decrement_tickets(self, ticket_class):
+        column = Train._ticket_class_columns[ticket_class]
+        self.__dict__[column.key] = self.__dict__[column.key] - 1
 
     def __repr__(self):
         return f"<Train {self.number}>"  
