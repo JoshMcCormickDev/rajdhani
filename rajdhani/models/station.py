@@ -1,10 +1,7 @@
-from sqlalchemy import Column, String, Float, and_, or_, func
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, String, Float, or_, func
 
 from rajdhani.db_ops import Base
 
-
-# =======================================================================
 class Station(Base):
     __tablename__ = "station"
     
